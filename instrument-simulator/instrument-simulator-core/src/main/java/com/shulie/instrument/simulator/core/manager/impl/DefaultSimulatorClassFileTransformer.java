@@ -95,6 +95,18 @@ public class DefaultSimulatorClassFileTransformer extends SimulatorClassFileTran
                 : ClassStructureFactory.createClassStructure(classBeingRedefined);
     }
 
+    /**
+     *
+     * 注意这个方法， 这个是实现了ClassFileTransformer类里面的方法， 在这里 完成了字节码的增强，
+     *
+     *
+     * @param loader
+     * @param internalClassName
+     * @param classBeingRedefined
+     * @param protectionDomain
+     * @param srcByteCodeArray
+     * @return
+     */
     @Override
     public byte[] transform(final ClassLoader loader,
                             final String internalClassName,
@@ -110,6 +122,7 @@ public class DefaultSimulatorClassFileTransformer extends SimulatorClassFileTran
                 return null;
             }
 
+            // 返回新的字节码
             return _transform(
                     loader,
                     internalClassName,
@@ -132,6 +145,16 @@ public class DefaultSimulatorClassFileTransformer extends SimulatorClassFileTran
         }
     }
 
+    /**
+     *
+     * 返回了新的已经增强的类
+     *
+     * @param loader
+     * @param internalClassName
+     * @param classBeingRedefined
+     * @param srcByteCodeArray
+     * @return
+     */
     private byte[] _transform(final ClassLoader loader,
                               String internalClassName,
                               final Class<?> classBeingRedefined,
@@ -145,6 +168,7 @@ public class DefaultSimulatorClassFileTransformer extends SimulatorClassFileTran
             return null;
         }
 
+        // 获取类结构
         final ClassStructure classStructure = getClassStructure(loader, classBeingRedefined, srcByteCodeArray);
         if (internalClassName == null) {
             internalClassName = classStructure.getJavaClassName();
@@ -175,7 +199,7 @@ public class DefaultSimulatorClassFileTransformer extends SimulatorClassFileTran
             srcByteCodeArray = resetClassVersionToJava5(srcByteCodeArray);
         }
 
-        // 开始进行类匹配
+        // 开始进行类匹配， 其实就是类的增强， 使用了 ASM
         try {
             byte[] toByteCodeArray = new EventEnhancer().toByteCodeArray(
                     loader,

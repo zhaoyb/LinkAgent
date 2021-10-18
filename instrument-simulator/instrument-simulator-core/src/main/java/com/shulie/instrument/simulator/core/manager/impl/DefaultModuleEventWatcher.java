@@ -159,6 +159,7 @@ public class DefaultModuleEventWatcher implements ModuleEventWatcher {
                             index - 1, total
                     );
                 }
+                // 注意这里， 重新增强， 如果之前类加载过， 这里会重新增强， 保证下次加载的时候， 是增强后的。
                 inst.retransformClasses(waitingReTransformClass);
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("SIMULATOR: {}watch={} in module={} single reTransform {} success, at index={};total={};",
@@ -278,6 +279,7 @@ public class DefaultModuleEventWatcher implements ModuleEventWatcher {
                       final Progress progress) {
         final int watchId = watchIdSequencer.next();
         // 给对应的模块追加ClassFileTransformer
+        // 自定义的Transformer ， 需要继承ClassFileTransformer
         final SimulatorClassFileTransformer transformer = new DefaultSimulatorClassFileTransformer(this,
                 watchId, coreModule, matcher, isEnableUnsafe, namespace);
 
@@ -304,7 +306,7 @@ public class DefaultModuleEventWatcher implements ModuleEventWatcher {
         beginProgress(progress, waitingReTransformClasses.size());
         try {
 
-            // 应用JVM
+            // 应用JVM， 重新增强
             reTransformClasses(watchId, waitingReTransformClasses, progress);
 
             // 计数
