@@ -39,6 +39,7 @@
                             </descriptorRefs>
                             <archive>
                                 <manifestEntries>
+                                    <!-- agent的打包方式，入口类就是下面的一个 -->
                                     <Premain-Class>com.shulie.instrument.simulator.agent.instrument.InstrumentLauncher
                                     </Premain-Class>
                                     <Agent-Class>com.shulie.instrument.simulator.agent.instrument.InstrumentLauncher

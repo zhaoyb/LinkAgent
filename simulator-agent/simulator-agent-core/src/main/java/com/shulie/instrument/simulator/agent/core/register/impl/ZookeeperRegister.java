@@ -174,6 +174,7 @@ public class ZookeeperRegister implements Register {
             zkClientSpec.setConnectionTimeoutMillis(registerOptions.getConnectionTimeoutMillis());
             zkClientSpec.setSessionTimeoutMillis(registerOptions.getSessionTimeoutMillis());
             zkClientSpec.setThreadName("heartbeat");
+            // 实例化ZK
             this.zkClient = NetflixCuratorZkClientFactory.getInstance().create(zkClientSpec);
         } catch (RuntimeException e) {
             throw e;

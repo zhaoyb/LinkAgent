@@ -47,6 +47,11 @@ public class HttpApplicationUploader implements ApplicationUploader {
 
     public HttpApplicationUploader(AgentConfig agentConfig) {this.agentConfig = agentConfig;}
 
+    /**
+     *
+     *  检查并上报应用
+     *
+     */
     @Override
     public void checkAndGenerateApp() {
         String webUrl = agentConfig.getTroWebUrl();
@@ -76,6 +81,7 @@ public class HttpApplicationUploader implements ApplicationUploader {
         map.put(APP_COLUMN_CACHE_PATH, appName + "/cache.sh");
         final StringBuilder url = new StringBuilder(webUrl).append(APP_INSERT_URL);
         try {
+            // 上报应用
             HttpUtils.HttpResult httpResult = HttpUtils.doPost(url.toString(), userAppKey, JSON.toJSONString(map));
             if (!httpResult.isSuccess()) {
                 LOGGER.warn("上报应用失败 url={}, result={}", url, httpResult.getResult());

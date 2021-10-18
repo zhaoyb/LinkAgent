@@ -83,12 +83,24 @@ public class CoreLauncher {
         this(agentHome, -1L, null, null, null, null);
     }
 
+    /**
+     * 构造函数， 由com.shulie.instrument.simulator.agent.instrument.InstrumentLauncher 通过反射调用
+     *
+     * @param agentHome agent的home路径
+     * @param attachId
+     * @param attachName
+     * @param tagName
+     * @param instrumentation
+     * @param classLoader
+     */
     public CoreLauncher(String agentHome, long attachId, String attachName, String tagName, Instrumentation instrumentation, ClassLoader classLoader) {
         this.coreConfig = new CoreConfig(agentHome);
         this.instrumentation = instrumentation;
         this.classLoader = classLoader;
         this.tagName = tagName;
+        // 进程ID
         this.coreConfig.setAttachId(attachId);
+        // 进程名
         this.coreConfig.setAttachName(attachName);
         this.agentConfig = new AgentConfigImpl(this.coreConfig);
         System.setProperty("SIMULATOR_LOG_PATH", this.agentConfig.getLogPath());
@@ -146,14 +158,17 @@ public class CoreLauncher {
      * @throws IllegalAccessException
      */
     private void inject(Object object) throws IllegalAccessException {
+        // 获取打有@Resource的字段
         final Field[] resourceFieldArray = getFieldsWithAnnotation(object.getClass(), Resource.class);
         if (ArrayUtils.isEmpty(resourceFieldArray)) {
             return;
         }
         for (final Field resourceField : resourceFieldArray) {
+            // 获取字段类型
             final Class<?> fieldType = resourceField.getType();
-            // ConfigProvider 注入
+            // ConfigProvider 注入    如果字段是ExternalAPI类型
             if (ExternalAPI.class.isAssignableFrom(fieldType)) {
+                // 注入
                 FieldUtils.writeField(resourceField, object, this.externalAPI, true);
             }
         }
@@ -187,11 +202,12 @@ public class CoreLauncher {
     }
 
     /**
-     * 启动
+     * 启动   由com.shulie.instrument.simulator.agent.instrument.InstrumentLauncher 反射调用
      *
      * @throws Throwable
      */
     public void start() throws Throwable {
+        // 启动， 如果配置有延迟时间，则延迟运行
         this.startService.schedule(new Runnable() {
             @Override
             public void run() {
@@ -200,11 +216,16 @@ public class CoreLauncher {
                     RegisterFactory.init(agentConfig);
 
                     ApplicationUploader applicationUploader = new HttpApplicationUploader(agentConfig);
+                    // 检查并上报应用
                     applicationUploader.checkAndGenerateApp();
 
+                    // 获取注册实例
                     Register register = RegisterFactory.getRegister(agentConfig.getProperty("register.name", "zookeeper"));
+                    // 注册配置
                     RegisterOptions registerOptions = buildRegisterOptions(agentConfig);
+                    // 注册初始化
                     register.init(registerOptions);
+                    // 注册启动
                     register.start();
 
                     agentScheduler.setAgentConfig(agentConfig);
@@ -249,6 +270,10 @@ public class CoreLauncher {
                 }
             }
         }, delay, unit);
+
+
+
+
         if (LOGGER.isInfoEnabled()) {
             if (tagName != null) {
                 LOGGER.info("SIMULATOR: current load tag file name {}.", tagName);

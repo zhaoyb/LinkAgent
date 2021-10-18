@@ -234,6 +234,9 @@ public class HttpAgentScheduler implements AgentScheduler {
     private Result executeCommandPacket(CommandPacket commandPacket) throws Throwable {
         /**
          * 如果是历史命令，则直接忽略
+         *
+         * 这里还有一个控制， 假如发生异常，导致N+1命令比N命令先到， 则N命令会被抛弃
+         *
          */
         if (commandPacket.getId() <= executeCommandId) {
             return null;

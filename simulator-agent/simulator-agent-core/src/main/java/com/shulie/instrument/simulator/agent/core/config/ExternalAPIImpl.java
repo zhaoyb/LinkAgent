@@ -87,6 +87,11 @@ public class ExternalAPIImpl implements ExternalAPI {
         HttpUtils.doPost(url, agentConfig.getUserAppKey(), JSON.toJSONString(body));
     }
 
+    /**
+     * 获取最条指令， 这个指令是从tro控制台拉取， 也就是说， 这个是pull模式，这样做可以避免并发
+     *
+     * @return
+     */
     @Override
     public CommandPacket getLatestCommandPacket() {
         String webUrl = agentConfig.getTroWebUrl();

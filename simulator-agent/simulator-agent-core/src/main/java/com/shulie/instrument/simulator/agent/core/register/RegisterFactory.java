@@ -37,6 +37,7 @@ public class RegisterFactory {
         if (!isInited.compareAndSet(false, true)) {
             return;
         }
+        //ZK 配置
         Register zkRegister = new ZookeeperRegister(agentConfig);
         registers.put(zkRegister.getName(), zkRegister);
     }

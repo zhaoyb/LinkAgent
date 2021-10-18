@@ -90,15 +90,27 @@ public class CoreConfig {
      */
     private String attachName;
 
+    /**
+     *
+     *
+     * @param agentHome  agent的home路径
+     */
     public CoreConfig(String agentHome) {
+        //agent的home路径
         this.agentHome = agentHome;
+        // config文件夹路径
         this.configFilePath = agentHome + File.separator + CONFIG_PATH_NAME;
+        // provider文件夹路径
         this.providerFilePath = agentHome + File.separator + PROVIDER_PATH_NAME;
+        // agent 文件夹路径
         this.simulatorHome = agentHome + File.separator + AGENT_PATH_NAME;
+        // instrument-simulator-agent.jar 路径
         this.simulatorJarPath = this.simulatorHome + File.separator + "simulator" + File.separator + "instrument-simulator-agent.jar";
+        // simulator-agent-logback.xml 路径
         this.logConfigFilePath = this.configFilePath + File.separator + "simulator-agent-logback.xml";
         File configFile = new File(configFilePath, "agent.properties");
         Properties properties = new Properties();
+        // 系统properties 配置
         properties.putAll(System.getProperties());
         InputStream configIn = null;
         try {
@@ -107,11 +119,12 @@ public class CoreConfig {
             } else {
                 configIn = new FileInputStream(configFile);
             }
-
+            // config properties配置
             properties.load(configIn);
             Enumeration enumeration = properties.propertyNames();
             while (enumeration.hasMoreElements()) {
                 String name = (String) enumeration.nextElement();
+                // 存放所有agent properties的配置
                 configs.put(name, properties.getProperty(name));
             }
         } catch (Throwable e) {

@@ -28,6 +28,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * 入口类
+ *
  * @author xiaobin.zfb|xiaobin@shulie.io         入口类
  * @since 2020/12/7 3:56 下午
  */
@@ -182,8 +184,11 @@ public class InstrumentLauncher {
      * @param inst          Instrumentation
      */
     public static void start(String featureString, Instrumentation inst) {
+        // 解析参数成 map 类型
         final Map<String, String> args = toFeatureMap(featureString);
+        // 获取延时加载的时间间隔
         final Integer delay = getDelay(args, null);
+        // 获取延时加载的时间单位
         final TimeUnit timeUnit = getTimeUnit(args, null);
 
         /**
@@ -198,6 +203,9 @@ public class InstrumentLauncher {
             /**
              * 如果是 jdk9及以上则采用外置进程方式attach 进程
              * 如果是 jdk9以下则使用内部方式attach 进程
+             *
+             * attach
+             *
              */
             startInternal(pid, processName, delay, timeUnit, inst);
         } catch (Throwable e) {
@@ -243,22 +251,29 @@ public class InstrumentLauncher {
      * @throws java.lang.reflect.InvocationTargetException
      */
     private static void startInternal(final long pid, final String processName, Integer delay, TimeUnit unit, Instrumentation inst) throws MalformedURLException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, java.lang.reflect.InvocationTargetException {
+        // simulator-agent-core.jar 的file表示
         File file = new File(DEFAULT_AGENT_HOME + File.separator + "core", "simulator-agent-core.jar");
+        //自定义 class load
         AgentClassLoader agentClassLoader = new AgentClassLoader(new URL[]{file.toURI().toURL()});
+        // 加载class
         Class coreLauncherOfClass = agentClassLoader.loadClass("com.shulie.instrument.simulator.agent.core.CoreLauncher");
+        // 获取构造函数
         Constructor constructor = coreLauncherOfClass.getConstructor(String.class, long.class, String.class, String.class, Instrumentation.class, ClassLoader.class);
+        // 实例化
         Object coreLauncherOfInstance = constructor.newInstance(DEFAULT_AGENT_HOME, pid, processName, getTagFileName(), inst, InstrumentLauncher.class.getClassLoader());
 
         if (delay != null) {
+            // 延时时间 反射赋值
             Method setDelayMethod = coreLauncherOfClass.getDeclaredMethod("setDelay", int.class);
             setDelayMethod.invoke(coreLauncherOfInstance, delay.intValue());
         }
 
         if (unit != null) {
+            // 延时时间单位 反射赋值
             Method setUnitMethod = coreLauncherOfClass.getDeclaredMethod("setUnit", TimeUnit.class);
             setUnitMethod.invoke(coreLauncherOfInstance, unit);
         }
-
+        // 反射调用start方法
         Method startMethod = coreLauncherOfClass.getDeclaredMethod("start");
         startMethod.invoke(coreLauncherOfInstance);
     }
